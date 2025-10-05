@@ -1,0 +1,47 @@
+API Documentation - Authentication & Authorization
+
+1. Authentication
+Our API uses JWT (JSON Web Tokens) for authentication. Users must obtain a token by sending their credentials to the /auth/login endpoint.
+
+Token Expiration: Tokens expire after 24 hours.
+Token Refresh: Use the /auth/refresh endpoint to get a new token.
+
+2. Authorization
+Different endpoints require different permission levels:
+- Public endpoints: No authentication required
+- User endpoints: Requires valid JWT token
+- Admin endpoints: Requires admin role in JWT token
+
+3. Rate Limiting
+API requests are rate-limited to prevent abuse:
+- Free tier: 100 requests per hour
+- Pro tier: 1000 requests per hour
+- Enterprise: 10000 requests per hour
+
+4. Error Handling
+The API returns standard HTTP status codes:
+- 200: Success
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 429: Rate Limit Exceeded
+- 500: Internal Server Error
+
+5. API Endpoints
+
+POST /auth/login
+- Description: Authenticate user and receive JWT token
+- Body: {"username": "string", "password": "string"}
+- Response: {"token": "jwt_token_here"}
+
+GET /users/profile
+- Description: Get current user profile
+- Headers: Authorization: Bearer {token}
+- Response: User profile object
+
+POST /data/upload
+- Description: Upload data to the system
+- Headers: Authorization: Bearer {token}
+- Body: multipart/form-data
+- Response: Upload confirmation

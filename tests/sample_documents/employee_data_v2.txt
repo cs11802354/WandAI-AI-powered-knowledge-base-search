@@ -1,0 +1,11 @@
+Employee Information - Version 2 (UPDATED)
+
+Manish Kumar
+ID: 1
+Department: Engineering
+Salary: $150
+Bonus: $10
+Status: Active
+Date: Q3 2024
+Promotion: Senior Engineer
+

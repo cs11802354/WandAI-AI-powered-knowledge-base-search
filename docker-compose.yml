@@ -1,0 +1,92 @@
+services:
+  # PostgreSQL with pgvector extension
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: kb_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: knowledge_base
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./setup_db.sql:/docker-entrypoint-initdb.d/setup.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery broker and caching
+  redis:
+    image: redis:7-alpine
+    container_name: kb_redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # FastAPI application
+  api:
+    build: .
+    container_name: kb_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/app/app
+      - upload_data:/app/uploads
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery worker for background tasks
+  celery_worker:
+    build: .
+    container_name: kb_celery_worker
+    command: celery -A app.celery_app worker --loglevel=info
+    volumes:
+      - ./app:/app/app
+      - upload_data:/app/uploads
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+
+  # Celery Beat for scheduled tasks
+  celery_beat:
+    build: .
+    container_name: kb_celery_beat
+    command: celery -A app.celery_app beat --loglevel=info
+    volumes:
+      - ./app:/app/app
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+
+  # Flower for monitoring Celery tasks
+  flower:
+    build: .
+    container_name: kb_flower
+    command: celery -A app.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  upload_data:

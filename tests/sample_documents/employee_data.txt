@@ -1,0 +1,9 @@
+Employee Information - Version 1
+
+Manish Kumar
+ID: 1
+Department: Engineering
+Salary: $100
+Status: Active
+Date: Q1 2024
+
