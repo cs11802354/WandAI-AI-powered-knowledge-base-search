@@ -11,6 +11,8 @@ chmod +x run.sh test.sh
 ### 2. Start the system
 
 ```bash
+before running this command kindly replace open api key with this in ".env" file
+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
 ./run.sh
 ```
 
